@@ -1,0 +1,5 @@
+<?
+define('data_directory', '/var/www/shackapi/.data/');
+define('SHACK_USER', '');
+define('SHACK_PASSWORD', '');
+?>
