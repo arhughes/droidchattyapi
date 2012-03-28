@@ -80,7 +80,7 @@ class Parser
         $html = curl_exec($curl);
 
         # We'll keep using the same session until Shacknews kicks us off.
-        if ($fast == false && strpos($html, '<li class="user light">latestchatty</li>') === false)
+        if ($fast == false && strpos($html, '<li class="user light"><a href="/user/latestchatty/posts">latestchatty</a></li>') === false)
         {
             # Need to log in, first.
             $fields = 'username=latestchatty&password=8675309&type=login';
