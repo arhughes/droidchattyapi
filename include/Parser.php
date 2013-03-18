@@ -71,7 +71,7 @@ class Parser
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HEADER, false);
-        #curl_setopt($curl, CURLOPT_ENCODING, 'gzip');
+        curl_setopt($curl, CURLOPT_ENCODING, 'gzip');
         curl_setopt($curl, CURLOPT_COOKIEFILE, $cookiejar);
         curl_setopt($curl, CURLOPT_COOKIEJAR, $cookiejar);
 
