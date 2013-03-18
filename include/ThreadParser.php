@@ -31,6 +31,26 @@ class ThreadParser extends Parser
         return $tree;
     }
 
+    public function getThreadReplyCount($threadID)
+    {
+        $threadID = intval($threadID);
+        $url      = "http://www.shacknews.com/frame_laryn.x?root=$threadID";
+        $html     = $this->download($url, true);
+
+        $this->init($html);
+
+        $count = 0;
+
+        while ($this->peek(1, '<div id="item_') !== false)
+        {
+            $this->clip(array('<div id="item_', '_'), '">');
+            $count++;
+        }
+
+        return $count;
+    }
+
+
     public function getThreadBodies($threadID)
     {
         $threadID = intval($threadID);
