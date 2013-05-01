@@ -74,23 +74,35 @@ class Parser
         curl_setopt($curl, CURLOPT_ENCODING, 'gzip');
         curl_setopt($curl, CURLOPT_COOKIEFILE, $cookiejar);
         curl_setopt($curl, CURLOPT_COOKIEJAR, $cookiejar);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_USERAGENT, 'droidchatty API');
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('X-Requested-With: libcurl'));
 
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_POST, false);
         $html = curl_exec($curl);
 
+        # Fill these in locally, but do not check into source control.
+        $username = 'droidchattyapi';
+        $password = '';
+
         # We'll keep using the same session until Shacknews kicks us off.
-        if ($fast == false && strpos($html, '<li class="user light"><a href="/user/latestchatty/posts">latestchatty</a></li>') === false)
+        if ($fast == false && 
+            strpos($html, '<li class="user light"><a href="/user/' . $username . '/posts">' . $username . '</a></li>') === false &&
+            strpos($html, '<a id="user_posts" href="/user/' . $username . '/posts">') === false)
         {
             # Need to log in, first.
-            $fields = 'username=latestchatty&password=8675309&type=login';
+            $fields = 'get_fields%5B%5D=result&user-identifier=' . $username . '&supplied-pass=' . $password . '&remember-login=1';
 
-            curl_setopt($curl, CURLOPT_URL, 'http://www.shacknews.com/login_laryn.x');
+            curl_setopt($curl, CURLOPT_URL, 'https://www.shacknews.com/account/signin');
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
-            $response = curl_exec($curl);
 
-            if (strpos($response, 'do_iframe_login(') !== false)
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array('X-Requested-With: XMLHttpRequest'));
+            $response = curl_exec($curl);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array('X-Requested-With: libcurl'));
+
+            if (strpos($response, '{"result":{"valid":"true"') !== false)
             {
                 # Successfully logged in.  Get the data again.
                 curl_setopt($curl, CURLOPT_URL, $url);
@@ -103,7 +115,7 @@ class Parser
             else
             {
                 curl_close($curl);
-                throw new Exception('Unable to log into user account.');
+                throw new Exception('Unable to log into the shared user account.);
             }
         }
 
@@ -122,18 +134,24 @@ class Parser
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HEADER, false);
+        curl_setopt($curl, CURLOPT_ENCODING, 'gzip');
         curl_setopt($curl, CURLOPT_COOKIEFILE, $cookiejar);
         curl_setopt($curl, CURLOPT_COOKIEJAR, $cookiejar);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_USERAGENT, 'droidchatty API');
 
         # Log in first.
-        $fields = 'username=' . urlencode($username) . '&password=' . urlencode($password) . '&type=login';
+        $fields = 'get_fields%5B%5D=result&user-identifier=' . urlencode($username) . '&supplied-pass=' . urlencode($password);
 
-        curl_setopt($curl, CURLOPT_URL, 'http://www.shacknews.com/login_laryn.x');
+        curl_setopt($curl, CURLOPT_URL, 'https://www.shacknews.com/account/signin');
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
-        $response = curl_exec($curl);
 
-        if (strpos($response, 'do_iframe_login(') === false)
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('X-Requested-With: XMLHttpRequest'));
+        $response = curl_exec($curl);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('X-Requested-With: libcurl'));
+
+        if (strpos($response, '{"result":{"valid":"true"') === false)
         {
             curl_close($curl);
             unlink($cookiejar);
