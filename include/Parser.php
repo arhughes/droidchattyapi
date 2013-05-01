@@ -115,7 +115,7 @@ class Parser
             else
             {
                 curl_close($curl);
-                throw new Exception('Unable to log into the shared user account.);
+                throw new Exception('Unable to log into the shared user account.');
             }
         }
 
