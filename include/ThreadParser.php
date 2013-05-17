@@ -22,7 +22,7 @@ class ThreadParser extends Parser
         {
             if (isset($bodies_table[$reply['id']]))
             {
-                $reply['body'] = $bodies_table[$reply['id']]['body'];
+                $reply['body'] = str_replace("\r", "", $bodies_table[$reply['id']]['body']);
                 $reply['date'] = $bodies_table[$reply['id']]['date'];
                 $tree['replies'][$i] = $reply;
             }
@@ -148,9 +148,9 @@ class ThreadParser extends Parser
         $thread['author'] = html_entity_decode(trim($p->clip(
             array('<span class="author">', '<span class="user">', '<a rel="nofollow" href="/user/', '>'),
             '</a>')));
-        $thread['body'] = trim($p->clip(
+        $thread['body'] = trim(str_replace("\r", "", $p->clip(
             array('<div class="postbody">', '>'),
-            '</div>'));
+            '</div>')));
         $thread['date'] = $p->clip(
             array('<div class="postdate">', '>'),
             '</div');

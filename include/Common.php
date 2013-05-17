@@ -3,7 +3,6 @@ function send_json($o)
 {
 	$json = json_encode($o);
 	$json = str_replace('\\/', '/', $json);
-	$json = str_replace('\r', '', $json);
 
 	if (!headers_sent())
 	{
