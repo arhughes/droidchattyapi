@@ -76,7 +76,7 @@ class ThreadParser extends Parser
                 array('<div id="item_', '_'),
                 '">');
             $reply['category'] = $this->clip(
-                array('<div class="fullpost fpmod_', '_'),
+                array('<div class="fullpost', 'fpmod_', '_'),
                 ' ');
             $reply['author'] = trim(html_entity_decode($this->clip(
                 array('<span class="author">', '<span class="user">', '<a rel="nofollow" href="/user/', '>'),
