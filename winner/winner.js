@@ -33,12 +33,12 @@ function pick(callback) {
   };
 
   if (options.id === 0) {
-    callback('["You must specify a thead id."]');
+    callback(["You must specify a thead id."]);
   } else {
     var url = 'https://winchatty.com/v2/getSubthread?id=' + options.id;
     $.getJSON(url, function(data) {
       if (data.error === true) {
-        callback('["Error fetching thread"]');
+        callback(["Error fetching thread"]);
       } else {
         var thread = data.subthreads[0].posts;
         var winners = pickWinnersFromPosts(thread, options);
