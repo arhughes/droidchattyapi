@@ -3,12 +3,14 @@ var moment = require('moment-timezone');
 var request = require('request');
 var logger = require('morgan');
 var compression = require('compression');
+var path = require('path');
 
 var app = express();
 
 // log everything and compress responses
 app.use(logger(':method :url :status :res[content-length] - :response-time ms'));
 app.use(compression());
+app.use('/winner', express.static(path.join(__dirname, 'winner')));
 
 function convertTime(time) {
     // convert time to format expected by droidchatty

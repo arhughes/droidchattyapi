@@ -1,0 +1,19 @@
+<html>
+  <head>
+    <title>Shacknews Winner Picker</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="winner.js"></script>
+  </head>
+  <body>
+    <form id="form">
+      <table>
+        <tr><td><label for="id">Thread ID</label></td><td><input name="id" id="id" /></td></tr>
+        <tr><td><label for="winner_count">Number of winners</label></td><td><input name="winner_count" id="winner_count" type="text" value="1" /></td></tr>
+        <tr><td><label for="ignore_op">Ignore OP</label></td><td><input name="ignore_op" id="ignore_op" type="checkbox" checked="true" /></td></tr>
+        <tr><td><label for="direct_replies_only">Direct Replies Only</label></td><td><input name="direct_replies_only" id="direct_replies_only" type="checkbox" /></td></tr>
+        <tr><td colspan="2"><input type="button" value="Submit" onclick="pickWinners()" /></td></tr>
+      </table>
+      <div id="winners"></div>
+    </form>
+  </body>
+</html>
