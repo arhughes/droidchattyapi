@@ -87,7 +87,7 @@ app.get('/page.php', function(req, res) {
 app.get('/thread.php', function(req, res) {
     var id = req.query.id;
     var url = 'http://winchatty.com/v2/getThread?id=' + id;
-    request(url, function(error, response, body) {
+    request({uri: url, gzip: true}, function(error, response, body) {
         if (error) {
             res.send(error);
             return;
@@ -143,7 +143,7 @@ app.get("/search.php", function(req, res) {
     var offset = (page - 1) * limit;
 
     var url = 'http://winchatty.com/v2/search?terms=' + encodeURIComponent(terms) + '&author=' + encodeURIComponent(author) + '&parentAuthor=' + encodeURIComponent(parentAuthor) + '&category=' + encodeURIComponent(category) + '&offset=' + offset + '&limit=' + limit;
-    request(url, function(error, response, body) {
+    request({uri: url, gzip: true}, function(error, response, body) {
         if (error) {
             res.send(error);
             return;
