@@ -62,19 +62,21 @@ app.get('/page.php', function(req, res) {
             return;
         }
         var r = JSON.parse(body);
-        var posts = r.rootPosts;
-        var count = posts.length;
+        if (!r.error) {
+            var posts = r.rootPosts;
+            var count = posts.length;
 
-        for (i = 0; i < count; i++) {
-            comments.push({
-                body: posts[i].body,
-                category: posts[i].category,
-                id: posts[i].id,
-                author: posts[i].author,
-                date: convertTime(posts[i].date),
-                reply_count: posts[i].postCount,
-                replied: posts[i].isParticipant
-            });
+            for (i = 0; i < count; i++) {
+                comments.push({
+                    body: posts[i].body,
+                    category: posts[i].category,
+                    id: posts[i].id,
+                    author: posts[i].author,
+                    date: convertTime(posts[i].date),
+                    reply_count: posts[i].postCount,
+                    replied: posts[i].isParticipant
+                });
+            }
         }
 
         res.setHeader('Content-type', 'application/json');
@@ -91,33 +93,38 @@ app.get('/thread.php', function(req, res) {
             return;
         }
         var r = JSON.parse(body);
-        var posts = r.threads[0].posts;
-        posts.sort(function(a, b) { return a.id - b.id; });
+        var ordered = [];
 
-        var root = {};
-        var nodes = {};
+        if (!r.error) {
+            var posts = r.threads[0].posts;
+            posts.sort(function(a, b) { return a.id - b.id; });
 
-        // convert list of posts into a tree
-        for (var i = 0; i < posts.length; i++) {
-            var post = posts[i];
+            var root = {};
+            var nodes = {};
 
-            var new_node = {
-                'post': post,
-                'children': []
-            };
+            // convert list of posts into a tree
+            for (var i = 0; i < posts.length; i++) {
+                var post = posts[i];
 
-            if (post.id === post.threadId) {
-                root = new_node
-            } else {
-                var parent = nodes[post.parentId];
-                parent.children.push(new_node);
+                var new_node = {
+                    'post': post,
+                    'children': []
+                };
+
+                if (post.id === post.threadId) {
+                    root = new_node
+                } else {
+                    var parent = nodes[post.parentId];
+                    parent.children.push(new_node);
+                }
+
+                nodes[post.id] = new_node;
             }
 
-            nodes[post.id] = new_node;
+            // convert tree to depth first list
+            ordered = orderTree(root, 0);
         }
 
-        // convert tree to depth first list
-        var ordered = orderTree(root, 0);
         res.setHeader('Content-type', 'application/json');
         res.send({replies: ordered});
 
@@ -141,17 +148,20 @@ app.get("/search.php", function(req, res) {
             res.send(error);
             return;
         }
-        var r = JSON.parse(body);
-        var posts = r.posts;
 
         var result = [];
-        for (var i = 0; i < posts.length; i++) {
-            result.push({
-                id: posts[i].id,
-                preview: posts[i].body,
-                author: posts[i].author,
-                date: convertTime(posts[i].date)
-            });
+        var r = JSON.parse(body);
+        if (!r.error) {
+            var posts = r.posts;
+
+            for (var i = 0; i < posts.length; i++) {
+                result.push({
+                    id: posts[i].id,
+                    preview: posts[i].body,
+                    author: posts[i].author,
+                    date: convertTime(posts[i].date)
+                });
+            }
         }
 
         res.setHeader('Content-type', 'application/json');
