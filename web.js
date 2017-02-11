@@ -4,6 +4,7 @@ var request = require('request');
 var logger = require('morgan');
 var compression = require('compression');
 var path = require('path');
+var qs = require("querystring");
 
 var app = express();
 
@@ -48,35 +49,42 @@ app.get("/*", function(req, res, next) {
 
 app.get('/page.php', function(req, res) {
     var page = req.query.page || 1;
-    var user = req.query.user || "";
-
     var limit = 40;
-    var offset = (page - 1) * limit;
+    
+    var options = {
+        offset: (page - 1) * limit,
+        limit: limit,
+        user: req.query.user || ""
+    };
 
-    var comments = [];
-
-    var url = 'http://winchatty.com/v2/getChattyRootPosts?offset=' + offset + "&limit=" + limit + "&username=" + encodeURIComponent(user);
+    var url = 'http://winchatty.com/v2/getChattyRootPosts?' + qs.stringify(options);
     request({uri: url, gzip: true}, function(error, response, body) {
         if (error) {
             res.send(error);
             return;
         }
-        var r = JSON.parse(body);
-        if (!r.error) {
-            var posts = r.rootPosts;
-            var count = posts.length;
 
-            for (i = 0; i < count; i++) {
-                comments.push({
-                    body: posts[i].body,
-                    category: posts[i].category,
-                    id: posts[i].id,
-                    author: posts[i].author,
-                    date: convertTime(posts[i].date),
-                    reply_count: posts[i].postCount,
-                    replied: posts[i].isParticipant
-                });
+        var comments = [];
+        try {
+            var r = JSON.parse(body);
+            if (!r.error && r.rootPosts) {
+                var posts = r.rootPosts;
+                var count = posts.length;
+
+                for (i = 0; i < count; i++) {
+                    comments.push({
+                        body: posts[i].body,
+                        category: posts[i].category,
+                        id: posts[i].id,
+                        author: posts[i].author,
+                        date: convertTime(posts[i].date),
+                        reply_count: posts[i].postCount,
+                        replied: posts[i].isParticipant
+                    });
+                }
             }
+        } catch (err) {
+            console.error("Error parsing page " + page, err);
         }
 
         res.setHeader('Content-type', 'application/json');
@@ -85,44 +93,52 @@ app.get('/page.php', function(req, res) {
 });
 
 app.get('/thread.php', function(req, res) {
+
     var id = req.query.id;
+
     var url = 'http://winchatty.com/v2/getThread?id=' + id;
     request({uri: url, gzip: true}, function(error, response, body) {
         if (error) {
             res.send(error);
             return;
         }
-        var r = JSON.parse(body);
+
         var ordered = [];
+        try {
+            var r = JSON.parse(body);
+            if (!r.error && r.threads && r.threads.length > 0) {
+                var posts = r.threads[0].posts;
 
-        if (!r.error) {
-            var posts = r.threads[0].posts;
-            posts.sort(function(a, b) { return a.id - b.id; });
+                // sort all the posts by id, so they are in chronological order
+                posts.sort(function(a, b) { return a.id - b.id; });
 
-            var root = {};
-            var nodes = {};
+                var root = {};
+                var nodes = {};
 
-            // convert list of posts into a tree
-            for (var i = 0; i < posts.length; i++) {
-                var post = posts[i];
+                // convert list of posts into a tree
+                for (var i = 0; i < posts.length; i++) {
+                    var post = posts[i];
 
-                var new_node = {
-                    'post': post,
-                    'children': []
-                };
+                    var new_node = {
+                        'post': post,
+                        'children': []
+                    };
 
-                if (post.id === post.threadId) {
-                    root = new_node
-                } else {
-                    var parent = nodes[post.parentId];
-                    parent.children.push(new_node);
+                    if (post.id === post.threadId) {
+                        root = new_node
+                    } else {
+                        var parent = nodes[post.parentId];
+                        parent.children.push(new_node);
+                    }
+
+                    nodes[post.id] = new_node;
                 }
 
-                nodes[post.id] = new_node;
+                // convert tree to depth first list
+                ordered = orderTree(root, 0);
             }
-
-            // convert tree to depth first list
-            ordered = orderTree(root, 0);
+        } catch (err) {
+            console.error("Error parsing thread id " + id, err);
         }
 
         res.setHeader('Content-type', 'application/json');
@@ -133,16 +149,19 @@ app.get('/thread.php', function(req, res) {
 
 app.get("/search.php", function(req, res) {
 
-    var terms = req.query.terms || "";
-    var author = req.query.author || "";
-    var parentAuthor = req.query.parentAuthor || "";
-    var category = req.query.category || "";
-    var page = req.query.page || "";
-
+    var page = req.query.page || 1;
     var limit = 35;
-    var offset = (page - 1) * limit;
 
-    var url = 'http://winchatty.com/v2/search?terms=' + encodeURIComponent(terms) + '&author=' + encodeURIComponent(author) + '&parentAuthor=' + encodeURIComponent(parentAuthor) + '&category=' + encodeURIComponent(category) + '&offset=' + offset + '&limit=' + limit;
+    var options = {
+        terms: req.query.terms || "",
+        author: req.query.author || "",
+        parentAuthor: req.query.parentAuthor || "",
+        category: req.query.category || "",
+        offset: (page - 1) * limit,
+        limit: limit
+    };
+
+    var url = 'http://winchatty.com/v2/search?' + qs.stringify(options);
     request({uri: url, gzip: true}, function(error, response, body) {
         if (error) {
             res.send(error);
@@ -150,18 +169,22 @@ app.get("/search.php", function(req, res) {
         }
 
         var result = [];
-        var r = JSON.parse(body);
-        if (!r.error) {
-            var posts = r.posts;
+        try {
+            var r = JSON.parse(body);
+            if (!r.error && r.posts) {
+                var posts = r.posts;
 
-            for (var i = 0; i < posts.length; i++) {
-                result.push({
-                    id: posts[i].id,
-                    preview: posts[i].body,
-                    author: posts[i].author,
-                    date: convertTime(posts[i].date)
-                });
+                for (var i = 0; i < posts.length; i++) {
+                    result.push({
+                        id: posts[i].id,
+                        preview: posts[i].body,
+                        author: posts[i].author,
+                        date: convertTime(posts[i].date)
+                    });
+                }
             }
+        } catch (err) {
+            console.error("Error parsing search results.", err);
         }
 
         res.setHeader('Content-type', 'application/json');
