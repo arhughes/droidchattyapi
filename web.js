@@ -66,7 +66,7 @@ app.get('/page.php', function(req, res) {
         user: req.query.user || ""
     };
 
-    var url = 'http://winchatty.com/v2/getChattyRootPosts?' + qs.stringify(options);
+    var url = 'https://winchatty.com/v2/getChattyRootPosts?' + qs.stringify(options);
     request(url, function(error, response, body) {
         if (error) {
             res.send(error);
@@ -105,7 +105,7 @@ app.get('/thread.php', function(req, res) {
 
     var id = req.query.id;
 
-    var url = 'http://winchatty.com/v2/getThread?id=' + id;
+    var url = 'https://winchatty.com/v2/getThread?id=' + id;
     request(url, function(error, response, body) {
         if (error) {
             res.send(error);
@@ -170,7 +170,7 @@ app.get("/search.php", function(req, res) {
         limit: limit
     };
 
-    var url = 'http://winchatty.com/v2/search?' + qs.stringify(options);
+    var url = 'https://winchatty.com/v2/search?' + qs.stringify(options);
     request(url, function(error, response, body) {
         if (error) {
             res.send(error);
