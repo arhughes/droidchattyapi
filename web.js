@@ -192,6 +192,15 @@ app.get("/search.php", function(req, res) {
     });
 });
 
+app.use(function(err, req, res, next) {
+    console.error(err.stack);
+    res.send('Something broke!');
+});
+
+process.on('uncaughtException', function(exception) {
+    console.log(exception);
+});
+
 
 var port = process.env.PORT || 5000;
 app.listen(port, function() {
