@@ -13,6 +13,15 @@ app.use(logger(':method :url :status :res[content-length] - :response-time ms'))
 app.use(compression());
 app.use('/winner', express.static(path.join(__dirname, 'winner')));
 
+// set up default options for our requests
+var request = request.defaults({
+    timeout: 50 * 1000,
+    gzip: true,
+    headers: {
+        'User-Agent': 'droidchattyapi'
+    }
+});
+
 function convertTime(time) {
     // convert time to format expected by droidchatty
     return moment(time).tz('America/Los_Angeles').format('MMM DD, YYYY h:mma z');
@@ -58,7 +67,7 @@ app.get('/page.php', function(req, res) {
     };
 
     var url = 'http://winchatty.com/v2/getChattyRootPosts?' + qs.stringify(options);
-    request({uri: url, gzip: true}, function(error, response, body) {
+    request(url, function(error, response, body) {
         if (error) {
             res.send(error);
             return;
@@ -97,7 +106,7 @@ app.get('/thread.php', function(req, res) {
     var id = req.query.id;
 
     var url = 'http://winchatty.com/v2/getThread?id=' + id;
-    request({uri: url, gzip: true}, function(error, response, body) {
+    request(url, function(error, response, body) {
         if (error) {
             res.send(error);
             return;
@@ -162,7 +171,7 @@ app.get("/search.php", function(req, res) {
     };
 
     var url = 'http://winchatty.com/v2/search?' + qs.stringify(options);
-    request({uri: url, gzip: true}, function(error, response, body) {
+    request(url, function(error, response, body) {
         if (error) {
             res.send(error);
             return;
