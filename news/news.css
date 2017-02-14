@@ -1,0 +1,24 @@
+td {
+	vertical-align: top;
+    font-family: Helvetica; sans-serif;
+	font-size: 12px;
+}
+
+h1 {
+    text-align: center;
+}
+
+li {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+a {
+    text-decoration: none;
+}
+
+a.comments {
+    font-size: 8px;
+}
+
+a.image:before { content: "[pic] "; }

@@ -11,7 +11,23 @@ var app = express();
 // log everything and compress responses
 app.use(logger(':method :url :status :res[content-length] - :response-time ms'));
 app.use(compression());
+
+// set up static sites
 app.use('/winner', express.static(path.join(__dirname, 'winner')));
+app.use('/news', express.static(path.join(__dirname, 'news')));
+
+// proxy requests for rss feeds 
+app.use('/news/source/hackernews', function(req, res) {
+    request('https://news.ycombinator.com/rss').pipe(res);
+});
+
+app.use('/news/source/techmeme', function(req, res) {
+    request('https://www.techmeme.com/feed.xml').pipe(res);
+});
+
+app.use('/news/source/bogleheads', function(req, res) {
+    request('https://www.bogleheads.org/rss/').pipe(res);
+});
 
 // set up default options for our requests
 var request = request.defaults({
