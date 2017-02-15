@@ -41,7 +41,7 @@ function reddit(url, callback) {
             var data = [];
             content['data']['children'].forEach(function(child) {
                 data.push(new Item(
-                    child.data.title,
+                    child.data.title.replace(/&amp;/ig, "&"),
                     child.data.url.replace(/&amp;/ig, "&"),
                     "https://www.reddit.com" + child.data.permalink
                 ));
