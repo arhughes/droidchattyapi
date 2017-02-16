@@ -5,4 +5,4 @@ COPY . ./
 
 RUN npm install
 
-CMD ["node", "web.js"]
+CMD ["./node_modules/forever/bin/forever", "web.js"]
