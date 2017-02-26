@@ -21,4 +21,6 @@ a.comments {
     font-size: 8px;
 }
 
-a.image:before { content: "[pic] "; }
+li.image:before { content: "[pic] "; }
+
+img { max-width: 400px; max-height: 400px; }

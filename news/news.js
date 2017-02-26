@@ -120,6 +120,17 @@ function display(list, data) {
         var li = $("<li>").appendTo(list);
 
         var a = $('<a>', {text: current.title, href: current.link}).appendTo(li)[0];
+        
+        for (var i = 0; i < ImageSources.length; i++) {
+            var source = ImageSources[i];
+            if (source.check(current.link)) {
+                $(a).data('image-type', source.name);
+                $(a).click(toggleImage);
+                $(li).addClass('image');
+                break;
+            }
+        }
+        
 
         // only show the host and comments link if this site has comments
         if (current.comments) {
@@ -128,6 +139,33 @@ function display(list, data) {
         }
     });
 }
+
+function toggleImage() {
+    var a = this;
+
+    // remove any existing previews
+    var preview = $(a).children("img");
+    if (preview.length > 0) {
+        $(preview).remove();
+        return false;
+    }
+
+    // add new image preview
+    var type = $(a).data('image-type');
+    var source = imageLookup[type];
+    var imageUrl = source.expand(a.href);
+    $(a).append("<img src='" + imageUrl + "'/>");
+
+    // load the original href so it will show up as visited
+    $("#track").attr('src', a.href);
+
+    return false;
+}
+
+var imageLookup = {};
+ImageSources.forEach(function(source) {
+    imageLookup[source.name] = source;
+});
 
 // setup our list of sources with their titles
 var sources = [
