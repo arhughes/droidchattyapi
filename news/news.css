@@ -22,5 +22,7 @@ a.comments {
 }
 
 li.image:before { content: "[pic] "; }
+li.video:before { content: "[vid] "; }
 
 img { max-width: 400px; max-height: 400px; }
+video { max-width: 400px; max-height: 400px; }

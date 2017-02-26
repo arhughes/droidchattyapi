@@ -118,19 +118,8 @@ function getHost(url) {
 function display(list, data) {
     data.forEach(function(current) {
         var li = $("<li>").appendTo(list);
-
         var a = $('<a>', {text: current.title, href: current.link}).appendTo(li)[0];
-        
-        for (var i = 0; i < ImageSources.length; i++) {
-            var source = ImageSources[i];
-            if (source.check(current.link)) {
-                $(a).data('image-type', source.name);
-                $(a).click(toggleImage);
-                $(li).addClass('image');
-                break;
-            }
-        }
-        
+        checkImage(current.link, a, li);
 
         // only show the host and comments link if this site has comments
         if (current.comments) {
@@ -140,21 +129,50 @@ function display(list, data) {
     });
 }
 
+function checkImage(url, a, li) {
+    var i = 0;
+    var source;
+
+    function success(type = IMAGE_TYPE_IMAGE) {
+        $(a).data('image-source', source.name);
+        $(a).data('image-type', type);
+        $(a).click(toggleImage);
+        $(li).addClass(type == IMAGE_TYPE_IMAGE ? 'image' : 'video');
+    }
+
+    function next() {
+        if (++i < ImageSources.length) {
+            source = ImageSources[i];
+            source.check(url, success, next);
+        }
+    }
+
+    // start with the first one
+    source = ImageSources[i];
+    source.check(url, success, next);
+}
+
 function toggleImage() {
     var a = this;
 
     // remove any existing previews
-    var preview = $(a).children("img");
+    var preview = $(a).children("img, video");
     if (preview.length > 0) {
         $(preview).remove();
         return false;
     }
 
     // add new image preview
-    var type = $(a).data('image-type');
-    var source = imageLookup[type];
+    var sourceName = $(a).data('image-source');
+    var imageType = $(a).data('image-type');
+    var source = imageLookup[sourceName];
     var imageUrl = source.expand(a.href);
-    $(a).append("<img src='" + imageUrl + "'/>");
+
+    if (imageType == IMAGE_TYPE_IMAGE) {
+        $(a).append("<img src='" + imageUrl + "'/>");
+    } else {
+        $(a).append('<video autoplay loop muted src="' + imageUrl + '">');
+    }
 
     // load the original href so it will show up as visited
     $("#track").attr('src', a.href);
