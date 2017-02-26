@@ -79,7 +79,7 @@ app.get('/page.php', function(req, res) {
     var options = {
         offset: (page - 1) * limit,
         limit: limit,
-        user: req.query.user || ""
+        username: req.query.user || ""
     };
 
     var url = 'https://winchatty.com/v2/getChattyRootPosts?' + qs.stringify(options);
