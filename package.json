@@ -10,7 +10,7 @@
     "request": "^2.79.0"
   },
   "engines": {
-    "node": "7.5.x",
-    "npm": "4.1.x"
+    "node": "8.x",
+    "npm": "5.x"
   }
 }
